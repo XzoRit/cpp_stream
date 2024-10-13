@@ -1,0 +1,381 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_CXX_STANDARD": "23",
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+      }
+    },
+    {
+      "name": "ninja",
+      "hidden": true,
+      "generator": "Ninja"
+    },
+    {
+      "name": "based",
+      "hidden": true,
+      "inherits": [
+        "base"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "shrd",
+      "hidden": true,
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": "ON"
+      }
+    },
+    {
+      "name": "gcc",
+      "inherits": [
+        "base"
+      ],
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
+      }
+    },
+    {
+      "name": "gccd",
+      "inherits": [
+        "based",
+        "gcc"
+      ]
+    },
+    {
+      "name": "gccshrd",
+      "inherits": [
+        "shrd",
+        "gcc"
+      ]
+    },
+    {
+      "name": "gccdshrd",
+      "inherits": [
+        "shrd",
+        "gccd"
+      ]
+    },
+    {
+      "name": "clang",
+      "inherits": [
+        "base"
+      ],
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++"
+      }
+    },
+    {
+      "name": "clangd",
+      "inherits": [
+        "based",
+        "clang"
+      ]
+    },
+    {
+      "name": "clangshrd",
+      "inherits": [
+        "shrd",
+        "clang"
+      ]
+    },
+    {
+      "name": "clangdshrd",
+      "inherits": [
+        "shrd",
+        "clangd"
+      ]
+    },
+    {
+      "name": "msvc",
+      "inherits": [
+        "base"
+      ]
+    },
+    {
+      "name": "msvc_ninja",
+      "inherits": [
+        "base",
+        "ninja"
+      ]
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "gcc",
+      "configurePreset": "gcc"
+    },
+    {
+      "name": "gccd",
+      "configurePreset": "gccd"
+    },
+    {
+      "name": "gccshrd",
+      "configurePreset": "gccshrd"
+    },
+    {
+      "name": "gccdshrd",
+      "configurePreset": "gccdshrd"
+    },
+    {
+      "name": "clang",
+      "configurePreset": "clang"
+    },
+    {
+      "name": "clangd",
+      "configurePreset": "clangd"
+    },
+    {
+      "name": "clangshrd",
+      "configurePreset": "clangshrd"
+    },
+    {
+      "name": "clangdshrd",
+      "configurePreset": "clangdshrd"
+    },
+    {
+      "name": "msvc",
+      "configurePreset": "msvc",
+      "configuration": "Release"
+    },
+    {
+      "name": "msvcd",
+      "configurePreset": "msvc",
+      "configuration": "Debug"
+    },
+    {
+      "name": "msvc_ninja",
+      "configurePreset": "msvc_ninja",
+      "configuration": "Release"
+    },
+    {
+      "name": "msvc_ninjad",
+      "configurePreset": "msvc_ninja",
+      "configuration": "Debug"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "output": {
+        "verbosity": "extra"
+      }
+    },
+    {
+      "name": "gcc",
+      "configurePreset": "gcc",
+      "inherits": [
+        "base"
+      ]
+    },
+    {
+      "name": "gccd",
+      "configurePreset": "gccd",
+      "inherits": [
+        "base"
+      ]
+    },
+    {
+      "name": "gccshrd",
+      "configurePreset": "gccshrd",
+      "inherits": [
+        "base"
+      ]
+    },
+    {
+      "name": "gccdshrd",
+      "configurePreset": "gccdshrd",
+      "inherits": [
+        "base"
+      ]
+    },
+    {
+      "name": "clang",
+      "configurePreset": "clang",
+      "inherits": [
+        "base"
+      ]
+    },
+    {
+      "name": "clangd",
+      "configurePreset": "clangd",
+      "inherits": [
+        "base"
+      ]
+    },
+    {
+      "name": "clangshrd",
+      "configurePreset": "clangshrd",
+      "inherits": [
+        "base"
+      ]
+    },
+    {
+      "name": "clangdshrd",
+      "configurePreset": "clangdshrd",
+      "inherits": [
+        "base"
+      ]
+    },
+    {
+      "name": "msvc",
+      "configurePreset": "msvc",
+      "inherits": [
+        "base"
+      ],
+      "configuration": "Release"
+    },
+    {
+      "name": "msvcd",
+      "configurePreset": "msvc",
+      "inherits": [
+        "base"
+      ],
+      "configuration": "Debug"
+    },
+    {
+      "name": "msvc_ninja",
+      "configurePreset": "msvc_ninja",
+      "inherits": [
+        "base"
+      ],
+      "configuration": "Release"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "msvc",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "msvc"
+        },
+        {
+          "type": "build",
+          "name": "msvc"
+        },
+        {
+          "type": "test",
+          "name": "msvc"
+        }
+      ]
+    },
+    {
+      "name": "msvcd",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "msvc"
+        },
+        {
+          "type": "build",
+          "name": "msvcd"
+        },
+        {
+          "type": "test",
+          "name": "msvcd"
+        }
+      ]
+    },
+    {
+      "name": "msvc_ninja",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "msvc_ninja"
+        },
+        {
+          "type": "build",
+          "name": "msvc_ninja"
+        },
+        {
+          "type": "test",
+          "name": "msvc_ninja"
+        }
+      ]
+    },
+    {
+      "name": "gcc",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "gcc"
+        },
+        {
+          "type": "build",
+          "name": "gcc"
+        },
+        {
+          "type": "test",
+          "name": "gcc"
+        }
+      ]
+    },
+    {
+      "name": "gccd",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "gccd"
+        },
+        {
+          "type": "build",
+          "name": "gccd"
+        },
+        {
+          "type": "test",
+          "name": "gccd"
+        }
+      ]
+    },
+    {
+      "name": "clang",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "clang"
+        },
+        {
+          "type": "build",
+          "name": "clang"
+        },
+        {
+          "type": "test",
+          "name": "clang"
+        }
+      ]
+    },
+    {
+      "name": "clangd",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "clangd"
+        },
+        {
+          "type": "build",
+          "name": "clangd"
+        },
+        {
+          "type": "test",
+          "name": "clangd"
+        }
+      ]
+    }
+  ]
+}

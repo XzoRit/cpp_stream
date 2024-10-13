@@ -1,0 +1,20 @@
+constant sources
+    : [ glob *.cpp ]
+    ;
+
+exe exe
+    : $(sources)
+      /lib//lib_lib
+      /site-config//boost_program_options
+    ;
+
+import testing
+    ;
+
+unit-test run
+    : exe
+    : <testing.arg>"--help"
+    ;
+
+always run
+    ;
