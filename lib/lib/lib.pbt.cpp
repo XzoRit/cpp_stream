@@ -7,11 +7,18 @@
 
 namespace
 {
+using ::xzr::lib::hex;
 using ::xzr::lib::stream;
 auto to_string(auto a) -> std::string
 {
     stream s{};
     s << a;
+    return s.str();
+}
+auto to_hex_string(auto a) -> std::string
+{
+    stream s{};
+    s << hex(a);
     return s.str();
 }
 }
@@ -83,6 +90,31 @@ int main()
         const auto str{to_string(std::string_view{a})};
 
         RC_ASSERT(a == str);
+    });
+    // hex
+    ::rc::check("stream hex int", [](int a) {
+        const auto str{to_hex_string(a)};
+        const auto b{std::stoll(str, nullptr, 16)};
+
+        RC_ASSERT(a == b);
+    });
+    ::rc::check("stream hex long", [](long a) {
+        const auto str{to_hex_string(a)};
+        const auto b{std::stoll(str, nullptr, 16)};
+
+        RC_ASSERT(a == b);
+    });
+    ::rc::check("stream hex long long", [](long long a) {
+        const auto str{to_hex_string(a)};
+        const auto b{std::stoll(str, nullptr, 16)};
+
+        RC_ASSERT(a == b);
+    });
+    ::rc::check("stream hex signed char", [](signed char a) {
+        const auto str{to_hex_string(a)};
+        const auto b{std::stoll(str, nullptr, 16)};
+
+        RC_ASSERT(a == b);
     });
     return 0;
 }

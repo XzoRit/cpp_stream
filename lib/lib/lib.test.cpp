@@ -8,6 +8,7 @@
 namespace
 {
 using ::xzr::lib::default_buffer_size;
+using ::xzr::lib::hex;
 using stream = ::xzr::lib::stream;
 
 BOOST_AUTO_TEST_SUITE(lib_tests)
@@ -128,6 +129,12 @@ BOOST_AUTO_TEST_CASE(getter)
     BOOST_REQUIRE(s.c_str() == s.data());
     BOOST_REQUIRE(s.str() ==
                   "123" + std::string(default_buffer_size - 3u, 'X') + 'a');
+}
+BOOST_AUTO_TEST_CASE(fmt_hex)
+{
+    auto s{stream{}};
+    s << hex(10);
+    BOOST_REQUIRE_EQUAL(s.str(), "0xa");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
