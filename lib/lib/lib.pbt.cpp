@@ -2,6 +2,8 @@
 
 #include <rapidcheck.h>
 
+#include <ios>
+#include <sstream>
 #include <string>
 #include <string_view>
 
@@ -15,106 +17,126 @@ auto to_string(auto a) -> std::string
     s << a;
     return s.str();
 }
+auto to_std_string(auto a) -> std::string
+{
+    auto s{std::ostringstream{}};
+    s << a;
+    return s.str();
+}
 auto to_hex_string(auto a) -> std::string
 {
     stream s{};
     s << hex(a);
     return s.str();
 }
+auto to_std_hex_string(auto a) -> std::string
+{
+    auto s{std::ostringstream{}};
+    s << std::hex << a;
+    return s.str();
+}
 }
 int main()
 {
+    auto res{true};
     // signed
-    ::rc::check("stream int", [](int a) {
+    res &= ::rc::check("stream int", [](int a) {
         const auto str{to_string(a)};
-        const auto b{std::stoll(str)};
+        const auto std{to_std_string(a)};
 
-        RC_ASSERT(a == b);
+        RC_ASSERT(str == std);
     });
-    ::rc::check("stream long", [](long a) {
+    res &= ::rc::check("stream long", [](long a) {
         const auto str{to_string(a)};
-        const auto b{std::stoll(str)};
+        const auto std{to_std_string(a)};
 
-        RC_ASSERT(a == b);
+        RC_ASSERT(str == std);
     });
-    ::rc::check("stream long long", [](long long a) {
+    res &= ::rc::check("stream long long", [](long long a) {
         const auto str{to_string(a)};
-        const auto b{std::stoll(str)};
+        const auto std{to_std_string(a)};
 
-        RC_ASSERT(a == b);
+        RC_ASSERT(str == std);
     });
-    ::rc::check("stream signed char", [](signed char a) {
+    res &= ::rc::check("stream signed char", [](signed char a) {
         const auto str{to_string(a)};
-        const auto b{std::stoll(str)};
+        const auto std{to_std_string(a)};
 
-        RC_ASSERT(a == b);
+        RC_ASSERT(str == std);
     });
     // unsigned
-    ::rc::check("stream unsigned int", [](unsigned int a) {
+    res &= ::rc::check("stream unsigned int", [](unsigned int a) {
         const auto str{to_string(a)};
-        const auto b{std::stoull(str)};
+        const auto std{to_std_string(a)};
 
-        RC_ASSERT(a == b);
+        RC_ASSERT(str == std);
     });
-    ::rc::check("stream unsigned long", [](unsigned long a) {
+    res &= ::rc::check("stream unsigned long", [](unsigned long a) {
         const auto str{to_string(a)};
-        const auto b{std::stoull(str)};
+        const auto std{to_std_string(a)};
 
-        RC_ASSERT(a == b);
+        RC_ASSERT(str == std);
     });
-    ::rc::check("stream unsigned long long", [](unsigned long long a) {
+    res &= ::rc::check("stream unsigned long long", [](unsigned long long a) {
         const auto str{to_string(a)};
-        const auto b{std::stoull(str)};
+        const auto std{to_std_string(a)};
 
-        RC_ASSERT(a == b);
+        RC_ASSERT(str == std);
     });
-    ::rc::check("stream unsigned char", [](unsigned char a) {
+    res &= ::rc::check("stream unsigned char", [](unsigned char a) {
         const auto str{to_string(a)};
-        const auto b{std::stoull(str)};
+        const auto std{to_std_string(a)};
 
-        RC_ASSERT(a == b);
+        RC_ASSERT(str == std);
+    });
+    // float
+    res &= ::rc::check("stream float", [](float a) {
+        const auto str{to_string(a)};
+        const auto std{to_std_string(a)};
+
+        RC_ASSERT(str == std);
     });
     // char/string
-    ::rc::check("stream char", [](char a) {
+    res &= ::rc::check("stream char", [](char a) {
         const auto str{to_string(a)};
 
         RC_ASSERT(str.size() == 1u);
         RC_ASSERT(a == str[0]);
     });
-    ::rc::check("stream string", [](std::string a) {
+    res &= ::rc::check("stream string", [](std::string a) {
         const auto str{to_string(a)};
 
         RC_ASSERT(a == str);
     });
-    ::rc::check("stream string_view", [](std::string a) {
+    res &= ::rc::check("stream string_view", [](std::string a) {
         const auto str{to_string(std::string_view{a})};
 
         RC_ASSERT(a == str);
     });
     // hex
-    ::rc::check("stream hex int", [](int a) {
+    res &= ::rc::check("stream hex int", [](int a) {
         const auto str{to_hex_string(a)};
-        const auto b{std::stoll(str, nullptr, 16)};
+        const auto std{to_std_hex_string(a)};
 
-        RC_ASSERT(a == b);
+        RC_ASSERT(str == std);
     });
-    ::rc::check("stream hex long", [](long a) {
+    res &= ::rc::check("stream hex long", [](long a) {
         const auto str{to_hex_string(a)};
-        const auto b{std::stoll(str, nullptr, 16)};
+        const auto std{to_std_hex_string(a)};
 
-        RC_ASSERT(a == b);
+        RC_ASSERT(str == std);
     });
-    ::rc::check("stream hex long long", [](long long a) {
+    res &= ::rc::check("stream hex long long", [](long long a) {
         const auto str{to_hex_string(a)};
-        const auto b{std::stoll(str, nullptr, 16)};
+        const auto std{to_std_hex_string(a)};
 
-        RC_ASSERT(a == b);
+        RC_ASSERT(str == std);
     });
-    ::rc::check("stream hex signed char", [](signed char a) {
+    res &= ::rc::check("stream hex signed char", [](signed char a) {
         const auto str{to_hex_string(a)};
-        const auto b{std::stoll(str, nullptr, 16)};
+        const auto std{to_std_hex_string(a)};
 
-        RC_ASSERT(a == b);
+        RC_ASSERT(str == std);
     });
-    return 0;
+    return res;
 }

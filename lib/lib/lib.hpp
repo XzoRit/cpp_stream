@@ -16,13 +16,12 @@ inline namespace v1
 template <class Int>
 struct spec_int
 {
-    Int value{};
-    int base{};
+    Int value;
+    int base;
 };
-template <class Int>
-auto hex(Int a) -> spec_int<Int>
+auto hex(auto a)
 {
-    return {.value = a, .base = 16};
+    return spec_int<decltype(a)>{.value = a, .base = 16};
 }
 inline constexpr auto default_buffer_size{500u};
 template <class Num>
@@ -81,9 +80,9 @@ class stream
         return *this;
     }
     template <class Int>
-    auto operator<<(spec_int<Int>&& a) -> stream&
+    auto operator<<(spec_int<Int> a) -> stream&
     {
-        fill_spec_int(std::move(a));
+        fill_spec_int(a);
         return *this;
     }
     auto data() -> const char* const
@@ -111,24 +110,20 @@ class stream
         m_buf.insert(m_buf.end(), a.cbegin(), a.cend());
     }
     template <class Int>
-    auto fill_spec_int(spec_int<Int>&& a) -> void
+    auto fill_spec_int(spec_int<Int> a) -> void
     {
         auto tmp{tmp_buf<decltype(a.value)>{}};
-        auto offset{0u};
-        if (a.base == 16)
-        {
-            tmp[0] = '0';
-            tmp[1] = 'x';
-            offset = 2;
-        }
-        const auto [ptr, ec]{
-            std::to_chars(tmp.begin() + offset, tmp.end(), a.value, a.base)};
+        const auto [ptr,
+                    ec]{std::to_chars(tmp.begin(), tmp.end(), a.value, 16)};
         if (ec == std::errc{})
             m_buf.insert(m_buf.end(), tmp.data(), ptr);
     }
     auto fill_int(auto a) -> void
     {
-        fill_spec_int(spec_int<decltype(a)>{.value = a, .base = 10});
+        auto tmp{tmp_buf<decltype(a)>{}};
+        const auto [ptr, ec]{std::to_chars(tmp.begin(), tmp.end(), a)};
+        if (ec == std::errc{})
+            m_buf.insert(m_buf.end(), tmp.data(), ptr);
     }
     auto fill_double(auto a) -> void
     {
