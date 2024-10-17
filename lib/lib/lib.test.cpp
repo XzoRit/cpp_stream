@@ -1,3 +1,4 @@
+#include <boost/config/helper_macros.hpp>
 #include <lib/lib.hpp>
 
 #include <boost/test/unit_test.hpp>
@@ -84,12 +85,6 @@ auto from_std_hex_stream(auto a) -> std::string
     s << std::hex << a;
     return s.str();
 }
-auto from_std_hex_stream(signed char a) -> std::string
-{
-    auto s{std::ostringstream{}};
-    s << std::hex << int{a};
-    return "0x" + s.str().substr(0, 2);
-}
 auto from_hex_stream(auto a) -> std::string
 {
     auto s{stream{}};
@@ -133,9 +128,9 @@ BOOST_AUTO_TEST_CASE(stream_int)
 }
 BOOST_AUTO_TEST_CASE(stream_double)
 {
-    // BOOST_REQUIRE(cmp_streams<float>());
+    BOOST_REQUIRE(cmp_streams<float>());
     BOOST_REQUIRE(cmp_streams<double>());
-    // BOOST_REQUIRE(cmp_streams<long double>());
+    BOOST_REQUIRE(cmp_streams<long double>());
 }
 BOOST_AUTO_TEST_CASE(stream_str)
 {
@@ -144,12 +139,11 @@ BOOST_AUTO_TEST_CASE(stream_str)
 BOOST_AUTO_TEST_CASE(getter)
 {
     stream s{};
-    BOOST_REQUIRE(s.data() == nullptr);
-    BOOST_REQUIRE(s.c_str() == s.data());
+    BOOST_REQUIRE(std::string{s.c_str()}.empty());
     BOOST_REQUIRE(s.str().empty());
 
     s << 123;
-    const auto* dat_ptr{s.data()};
+    const auto* dat_ptr{s.c_str()};
     BOOST_REQUIRE(dat_ptr != nullptr);
     BOOST_REQUIRE(dat_ptr[0] == '1');
     BOOST_REQUIRE(dat_ptr[1] == '2');
@@ -159,46 +153,29 @@ BOOST_AUTO_TEST_CASE(getter)
     BOOST_REQUIRE(s.str() == "123");
 
     s << std::string(default_buffer_size - 3u, 'X');
-    BOOST_REQUIRE(dat_ptr == s.data());
-    BOOST_REQUIRE(s.c_str() == s.data());
+    BOOST_REQUIRE_EQUAL(dat_ptr, s.c_str());
     BOOST_REQUIRE(s.str() ==
                   "123" + std::string(default_buffer_size - 3u, 'X'));
 
     s << 'a';
-    BOOST_REQUIRE(dat_ptr != s.data());
-    BOOST_REQUIRE(s.data()[default_buffer_size] == 'a');
-    BOOST_REQUIRE(s.data()[default_buffer_size + 1u] == '\0');
-    BOOST_REQUIRE(s.c_str() == s.data());
+    BOOST_REQUIRE(dat_ptr != s.c_str());
+    BOOST_REQUIRE(s.c_str()[default_buffer_size] == 'a');
+    BOOST_REQUIRE(s.c_str()[default_buffer_size + 1u] == '\0');
     BOOST_REQUIRE(s.str() ==
                   "123" + std::string(default_buffer_size - 3u, 'X') + 'a');
 }
 BOOST_AUTO_TEST_CASE(fmt_hex)
 {
-    {
-        auto s{stream{}};
-        s << hex(10);
-        BOOST_REQUIRE_EQUAL(s.str(), "a");
-    }
-    {
-        auto s{stream{}};
-        s << hex(-1);
-        BOOST_REQUIRE_EQUAL(s.str(), "ffffffff");
-    }
-    {
-        auto s{std::ostringstream{}};
-        s << std::hex << -1;
-        BOOST_REQUIRE_EQUAL(s.str(), "ffffffff");
-    }
     // BOOST_REQUIRE(cmp_hex_streams<signed char>());
     // BOOST_REQUIRE(cmp_hex_streams<unsigned char>());
-    // BOOST_REQUIRE(cmp_hex_streams<short>());
-    // BOOST_REQUIRE(cmp_hex_streams<unsigned short>());
-    // BOOST_REQUIRE(cmp_hex_streams<int>());
-    // BOOST_REQUIRE(cmp_hex_streams<unsigned int>());
-    // BOOST_REQUIRE(cmp_hex_streams<long>());
-    // BOOST_REQUIRE(cmp_hex_streams<unsigned long>());
-    // BOOST_REQUIRE(cmp_hex_streams<long long>());
-    // BOOST_REQUIRE(cmp_hex_streams<unsigned long long>());
+    BOOST_REQUIRE(cmp_hex_streams<short>());
+    BOOST_REQUIRE(cmp_hex_streams<unsigned short>());
+    BOOST_REQUIRE(cmp_hex_streams<int>());
+    BOOST_REQUIRE(cmp_hex_streams<unsigned int>());
+    BOOST_REQUIRE(cmp_hex_streams<long>());
+    BOOST_REQUIRE(cmp_hex_streams<unsigned long>());
+    BOOST_REQUIRE(cmp_hex_streams<long long>());
+    BOOST_REQUIRE(cmp_hex_streams<unsigned long long>());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

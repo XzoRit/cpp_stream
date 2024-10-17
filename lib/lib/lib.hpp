@@ -5,9 +5,10 @@
 
 #include <array>
 #include <charconv>
+#include <concepts>
 #include <string>
 #include <string_view>
-#include <utility>
+#include <system_error>
 
 namespace xzr::lib
 {
@@ -26,78 +27,59 @@ auto hex(auto a)
 inline constexpr auto default_buffer_size{500u};
 template <class Num>
 using tmp_buf = std::array<char, boost::charconv::limits<Num>::max_chars10>;
+template <class Num>
+using tmp_max_buf = std::array<char, boost::charconv::limits<Num>::max_chars>;
 class stream
 {
   public:
-    auto operator<<(int a) -> stream&
-    {
-        fill_int(a);
-        return *this;
-    }
-    auto operator<<(unsigned int a) -> stream&
-    {
-        fill_int(a);
-        return *this;
-    }
-    auto operator<<(long a) -> stream&
-    {
-        fill_int(a);
-        return *this;
-    }
-    auto operator<<(unsigned long a) -> stream&
-    {
-        fill_int(a);
-        return *this;
-    }
-    auto operator<<(long long a) -> stream&
-    {
-        fill_int(a);
-        return *this;
-    }
-    auto operator<<(unsigned long long a) -> stream&
-    {
-        fill_int(a);
-        return *this;
-    }
-    auto operator<<(double a) -> stream&
-    {
-        fill_double(a);
-        return *this;
-    }
-    auto operator<<(long double a) -> stream&
-    {
-        fill_double(a);
-        return *this;
-    }
+    // integral
+    auto operator<<(bool) -> stream& = delete;
+    auto operator<<(char8_t) -> stream& = delete;
+    auto operator<<(char16_t) -> stream& = delete;
+    auto operator<<(char32_t) -> stream& = delete;
+    auto operator<<(wchar_t) -> stream& = delete;
+    auto operator<<(const char8_t*) -> stream& = delete;
+    auto operator<<(const char16_t*) -> stream& = delete;
+    auto operator<<(const char32_t*) -> stream& = delete;
+    auto operator<<(const wchar_t*) -> stream& = delete;
     auto operator<<(char a) -> stream&
     {
         fill_char(a);
         return *this;
     }
+    auto operator<<(std::integral auto a) -> stream&
+    {
+        fill_int(a);
+        return *this;
+    }
+    // floating_point
+    auto operator<<(std::floating_point auto a) -> stream&
+    {
+        fill_double(a);
+        return *this;
+    }
+    // string
     auto operator<<(const std::string_view a) -> stream&
     {
         fill_str(a);
         return *this;
     }
+    // integral with different base
     template <class Int>
     auto operator<<(spec_int<Int> a) -> stream&
     {
         fill_spec_int(a);
         return *this;
     }
-    auto data() -> const char* const
+    auto c_str() const -> const char*
     {
-        if (m_buf.empty())
-            return nullptr;
+        m_buf.reserve(m_buf.size() + 1);
+        *const_cast<char*>(m_buf.data() + m_buf.size()) = '\0';
         return m_buf.data();
-    }
-    auto c_str() -> const char* const
-    {
-        return data();
     }
     auto str() -> std::string const
     {
-        return {m_buf.data(), m_buf.data() + m_buf.size()};
+        return {m_buf.cbegin(), m_buf.cend()};
     }
 
   private:
@@ -108,15 +90,6 @@ class stream
     auto fill_str(const std::string_view a) -> void
     {
         m_buf.insert(m_buf.end(), a.cbegin(), a.cend());
-    }
-    template <class Int>
-    auto fill_spec_int(spec_int<Int> a) -> void
-    {
-        auto tmp{tmp_buf<decltype(a.value)>{}};
-        const auto [ptr,
-                    ec]{std::to_chars(tmp.begin(), tmp.end(), a.value, 16)};
-        if (ec == std::errc{})
-            m_buf.insert(m_buf.end(), tmp.data(), ptr);
     }
     auto fill_int(auto a) -> void
     {
@@ -136,7 +109,20 @@ class stream
         if (ec == std::errc{})
             m_buf.insert(m_buf.end(), tmp.data(), ptr);
     }
-    boost::container::small_vector<char, default_buffer_size> m_buf{};
+    template <class Int>
+    auto fill_spec_int(spec_int<Int> a) -> void
+    {
+        using u = std::make_unsigned_t<Int>;
+        auto tmp{tmp_max_buf<u>{}};
+        const auto [ptr, ec]{std::to_chars(tmp.begin(),
+                                           tmp.end(),
+                                           static_cast<u>(a.value),
+                                           a.base)};
+        if (ec == std::errc{})
+            m_buf.insert(m_buf.end(), tmp.data(), ptr);
+    }
+    using Buffer = boost::container::small_vector<char, default_buffer_size>;
+    mutable Buffer m_buf{};
 };
 }
 }
