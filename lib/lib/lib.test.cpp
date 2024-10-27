@@ -3,6 +3,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <concepts>
 #include <ios>
 #include <limits>
 #include <sstream>
@@ -79,10 +80,18 @@ auto cmp_streams() -> boost::test_tools::predicate_result
         return res;
     return res;
 }
-auto from_std_hex_stream(auto a) -> std::string
+auto from_std_hex_stream(std::unsigned_integral auto a) -> std::string
 {
     auto s{std::ostringstream{}};
     s << std::hex << a;
+    return s.str();
+}
+auto from_std_hex_stream(std::signed_integral auto a) -> std::string
+{
+    auto s{std::ostringstream{}};
+    if (a < 0)
+        s << '-';
+    s << std::hex << std::abs(a);
     return s.str();
 }
 auto from_hex_stream(auto a) -> std::string
@@ -166,6 +175,20 @@ BOOST_AUTO_TEST_CASE(getter)
 }
 BOOST_AUTO_TEST_CASE(fmt_hex)
 {
+
+    {
+        auto s{std::ostringstream{}};
+        const signed char a{-1};
+        s << std::hex << '-' << std::abs(a);
+        BOOST_CHECK_EQUAL(s.str(), "-1");
+    }
+
+    {
+        auto s{stream{}};
+        const signed char a{-1};
+        s << hex(a);
+        BOOST_CHECK_EQUAL(s.str(), "-1");
+    }
     // BOOST_REQUIRE(cmp_hex_streams<signed char>());
     // BOOST_REQUIRE(cmp_hex_streams<unsigned char>());
     BOOST_REQUIRE(cmp_hex_streams<short>());

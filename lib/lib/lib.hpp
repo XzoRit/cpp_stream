@@ -14,15 +14,20 @@ namespace xzr::lib
 {
 inline namespace v1
 {
-template <class Int>
+template <std::integral Int>
 struct spec_int
 {
     Int value;
     int base;
 };
-auto hex(auto a)
+auto hex(bool) = delete;
+auto hex(char8_t) = delete;
+auto hex(char16_t) = delete;
+auto hex(char32_t) = delete;
+auto hex(wchar_t) = delete;
+auto hex(std::integral auto a)
 {
-    return spec_int<decltype(a)>{.value = a, .base = 16};
+    return spec_int{.value = a, .base = 16};
 }
 inline constexpr auto default_buffer_size{500u};
 template <class Num>
@@ -38,15 +43,6 @@ class stream
     auto operator<<(char16_t) -> stream& = delete;
     auto operator<<(char32_t) -> stream& = delete;
     auto operator<<(wchar_t) -> stream& = delete;
-    auto operator<<(const char8_t*) -> stream& = delete;
-    auto operator<<(const char16_t*) -> stream& = delete;
-    auto operator<<(const char32_t*) -> stream& = delete;
-    auto operator<<(const wchar_t*) -> stream& = delete;
-    auto operator<<(char a) -> stream&
-    {
-        fill_char(a);
-        return *this;
-    }
     auto operator<<(std::integral auto a) -> stream&
     {
         fill_int(a);
@@ -59,13 +55,18 @@ class stream
         return *this;
     }
     // string
+    auto operator<<(char a) -> stream&
+    {
+        fill_char(a);
+        return *this;
+    }
     auto operator<<(const std::string_view a) -> stream&
     {
         fill_str(a);
         return *this;
     }
     // integral with different base
-    template <class Int>
+    template <std::integral Int>
     auto operator<<(spec_int<Int> a) -> stream&
     {
         fill_spec_int(a);
@@ -109,15 +110,12 @@ class stream
         if (ec == std::errc{})
             m_buf.insert(m_buf.end(), tmp.data(), ptr);
     }
-    template <class Int>
+    template <std::integral Int>
     auto fill_spec_int(spec_int<Int> a) -> void
     {
-        using u = std::make_unsigned_t<Int>;
-        auto tmp{tmp_max_buf<u>{}};
-        const auto [ptr, ec]{std::to_chars(tmp.begin(),
-                                           tmp.end(),
-                                           static_cast<u>(a.value),
-                                           a.base)};
+        auto tmp{tmp_max_buf<Int>{}};
+        const auto [ptr,
+                    ec]{std::to_chars(tmp.begin(), tmp.end(), a.value, a.base)};
         if (ec == std::errc{})
             m_buf.insert(m_buf.end(), tmp.data(), ptr);
     }

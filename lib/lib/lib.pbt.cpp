@@ -2,6 +2,7 @@
 
 #include <rapidcheck.h>
 
+#include <concepts>
 #include <ios>
 #include <sstream>
 #include <string>
@@ -23,16 +24,36 @@ auto to_std_string(auto a) -> std::string
     s << a;
     return s.str();
 }
+auto to_std_string(signed char a) -> std::string
+{
+    auto s{std::ostringstream{}};
+    s << static_cast<int>(a);
+    return s.str();
+}
+auto to_std_string(unsigned char a) -> std::string
+{
+    auto s{std::ostringstream{}};
+    s << static_cast<unsigned>(a);
+    return s.str();
+}
 auto to_hex_string(auto a) -> std::string
 {
     stream s{};
     s << hex(a);
     return s.str();
 }
-auto to_std_hex_string(auto a) -> std::string
+auto to_std_hex_string(std::unsigned_integral auto a) -> std::string
 {
     auto s{std::ostringstream{}};
     s << std::hex << a;
+    return s.str();
+}
+auto to_std_hex_string(std::signed_integral auto a) -> std::string
+{
+    auto s{std::ostringstream{}};
+    if (a < 0)
+        s << '-';
+    s << std::hex << std::abs(a);
     return s.str();
 }
 }
@@ -138,5 +159,5 @@ int main()
 
         RC_ASSERT(str == std);
     });
-    return res;
+    return !res;
 }
