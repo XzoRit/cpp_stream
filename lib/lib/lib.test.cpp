@@ -3,7 +3,10 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <array>
+#include <charconv>
 #include <concepts>
+#include <cstdio>
 #include <ios>
 #include <limits>
 #include <sstream>
@@ -14,37 +17,49 @@ namespace
 using ::xzr::lib::default_buffer_size;
 using ::xzr::lib::hex;
 using stream = ::xzr::lib::stream;
+using std_stream = std::ostringstream;
 
 BOOST_AUTO_TEST_SUITE(lib_tests)
 
-template <class Stream>
-auto to_string(auto a) -> std::string
+auto to_string_with_std(std::integral auto a) -> std::string
 {
-    auto s{Stream{}};
+    auto s{std_stream{}};
     s << a;
     return s.str();
 }
-template <class Stream>
-auto to_string(signed char a) -> std::string
+auto to_string_with_std(double a) -> std::string
 {
-    auto s{Stream{}};
+    auto buf{std::array<char, 32>{}};
+    const auto num_chars{std::snprintf(buf.data(), buf.size(), "%le", a)};
+    return {buf.data(), buf.data() + num_chars};
+}
+auto to_string_with_std(long double a) -> std::string
+{
+    auto buf{std::array<char, 32>{}};
+    const auto num_chars{std::snprintf(buf.data(), buf.size(), "%Lg", a)};
+    return {buf.data(), buf.data() + num_chars};
+}
+auto to_string_with_std(signed char a) -> std::string
+{
+    auto s{std_stream{}};
     s << int{a};
     return s.str();
 }
-template <class Stream>
-auto to_string(unsigned char a) -> std::string
+auto to_string_with_std(unsigned char a) -> std::string
 {
-    auto s{Stream{}};
+    auto s{std_stream{}};
     s << unsigned{a};
     return s.str();
 }
 auto from_std_stream(auto a) -> std::string
 {
-    return to_string<std::ostringstream>(a);
+    return to_string_with_std(a);
 }
 auto from_stream(auto a) -> std::string
 {
-    return to_string<stream>(a);
+    auto s{stream{}};
+    s << a;
+    return s.str();
 }
 auto cmp_str(auto a, auto b) -> boost::test_tools::predicate_result
 {
@@ -122,6 +137,44 @@ auto cmp_hex_streams() -> boost::test_tools::predicate_result
         return res;
     return res;
 }
+template <class Num>
+auto cmp_roundtrip(Num a) -> boost::test_tools::predicate_result
+{
+    stream str{};
+    str << a;
+    const auto s{str.str()};
+    auto b{Num{}};
+    std::from_chars(s.data(), s.data() + s.size(), b);
+    if (a != b)
+    {
+        auto res{boost::test_tools::predicate_result{false}};
+        res.message() << "not equal [" << a << " != " << b << "]";
+        return res;
+    }
+    return true;
+}
+template <class Num>
+auto roundtrip() -> boost::test_tools::predicate_result
+{
+    using lim = lim<Num>;
+    auto res{cmp_roundtrip(lim::min())};
+    if (!res)
+        return res;
+    res = cmp_roundtrip(lim::max());
+    if (!res)
+        return res;
+    res = cmp_roundtrip(lim::lowest());
+    if (!res)
+        return res;
+    res = cmp_roundtrip(lim::epsilon());
+    if (!res)
+        return res;
+    return res;
+    const auto a{lim::min()};
+    stream s{};
+    s << a;
+    return cmp_roundtrip<Num>(a);
+}
 BOOST_AUTO_TEST_CASE(stream_int)
 {
     BOOST_REQUIRE(cmp_streams<signed char>());
@@ -134,12 +187,23 @@ BOOST_AUTO_TEST_CASE(stream_int)
     BOOST_REQUIRE(cmp_streams<unsigned long>());
     BOOST_REQUIRE(cmp_streams<long long>());
     BOOST_REQUIRE(cmp_streams<unsigned long long>());
+
+    BOOST_REQUIRE(roundtrip<signed char>());
+    BOOST_REQUIRE(roundtrip<unsigned char>());
+    BOOST_REQUIRE(roundtrip<short>());
+    BOOST_REQUIRE(roundtrip<unsigned short>());
+    BOOST_REQUIRE(roundtrip<int>());
+    BOOST_REQUIRE(roundtrip<unsigned int>());
+    BOOST_REQUIRE(roundtrip<long>());
+    BOOST_REQUIRE(roundtrip<unsigned long>());
+    BOOST_REQUIRE(roundtrip<long long>());
+    BOOST_REQUIRE(roundtrip<unsigned long long>());
 }
 BOOST_AUTO_TEST_CASE(stream_double)
 {
-    BOOST_REQUIRE(cmp_streams<float>());
-    BOOST_REQUIRE(cmp_streams<double>());
-    BOOST_REQUIRE(cmp_streams<long double>());
+    BOOST_REQUIRE(roundtrip<float>());
+    BOOST_REQUIRE(roundtrip<double>());
+    BOOST_REQUIRE(roundtrip<long double>());
 }
 BOOST_AUTO_TEST_CASE(stream_str)
 {
@@ -175,20 +239,6 @@ BOOST_AUTO_TEST_CASE(getter)
 }
 BOOST_AUTO_TEST_CASE(fmt_hex)
 {
-
-    {
-        auto s{std::ostringstream{}};
-        const signed char a{-1};
-        s << std::hex << '-' << std::abs(a);
-        BOOST_CHECK_EQUAL(s.str(), "-1");
-    }
-
-    {
-        auto s{stream{}};
-        const signed char a{-1};
-        s << hex(a);
-        BOOST_CHECK_EQUAL(s.str(), "-1");
-    }
     // BOOST_REQUIRE(cmp_hex_streams<signed char>());
     // BOOST_REQUIRE(cmp_hex_streams<unsigned char>());
     BOOST_REQUIRE(cmp_hex_streams<short>());

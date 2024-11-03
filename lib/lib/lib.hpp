@@ -102,11 +102,7 @@ class stream
     auto fill_double(auto a) -> void
     {
         auto tmp{tmp_buf<decltype(a)>{}};
-        const auto [ptr, ec]{std::to_chars(tmp.begin(),
-                                           tmp.end(),
-                                           a,
-                                           std::chars_format::general,
-                                           6)};
+        const auto [ptr, ec]{std::to_chars(tmp.begin(), tmp.end(), a)};
         if (ec == std::errc{})
             m_buf.insert(m_buf.end(), tmp.data(), ptr);
     }
