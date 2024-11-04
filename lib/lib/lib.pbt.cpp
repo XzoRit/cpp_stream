@@ -1,61 +1,18 @@
+#include "utils.test.hpp"
+
 #include <lib/lib.hpp>
 
 #include <rapidcheck.h>
 
-#include <concepts>
-#include <ios>
-#include <sstream>
 #include <string>
 #include <string_view>
 
 namespace
 {
-using ::xzr::lib::hex;
-using ::xzr::lib::stream;
-auto to_string(auto a) -> std::string
-{
-    stream s{};
-    s << a;
-    return s.str();
-}
-auto to_std_string(auto a) -> std::string
-{
-    auto s{std::ostringstream{}};
-    s << a;
-    return s.str();
-}
-auto to_std_string(signed char a) -> std::string
-{
-    auto s{std::ostringstream{}};
-    s << static_cast<int>(a);
-    return s.str();
-}
-auto to_std_string(unsigned char a) -> std::string
-{
-    auto s{std::ostringstream{}};
-    s << static_cast<unsigned>(a);
-    return s.str();
-}
-auto to_hex_string(auto a) -> std::string
-{
-    stream s{};
-    s << hex(a);
-    return s.str();
-}
-auto to_std_hex_string(std::unsigned_integral auto a) -> std::string
-{
-    auto s{std::ostringstream{}};
-    s << std::hex << a;
-    return s.str();
-}
-auto to_std_hex_string(std::signed_integral auto a) -> std::string
-{
-    auto s{std::ostringstream{}};
-    if (a < 0)
-        s << '-';
-    s << std::hex << std::abs(a);
-    return s.str();
-}
+using ::xzr_test::lib::from_hex_string;
+using ::xzr_test::lib::from_string;
+using ::xzr_test::lib::to_hex_string;
+using ::xzr_test::lib::to_string;
 }
 int main()
 {
@@ -63,59 +20,59 @@ int main()
     // signed
     res &= ::rc::check("stream int", [](int a) {
         const auto str{to_string(a)};
-        const auto std{to_std_string(a)};
+        const auto b{from_string<decltype(a)>(str)};
 
-        RC_ASSERT(str == std);
+        RC_ASSERT(a == b);
     });
     res &= ::rc::check("stream long", [](long a) {
         const auto str{to_string(a)};
-        const auto std{to_std_string(a)};
+        const auto b{from_string<decltype(a)>(str)};
 
-        RC_ASSERT(str == std);
+        RC_ASSERT(a == b);
     });
     res &= ::rc::check("stream long long", [](long long a) {
         const auto str{to_string(a)};
-        const auto std{to_std_string(a)};
+        const auto b{from_string<decltype(a)>(str)};
 
-        RC_ASSERT(str == std);
+        RC_ASSERT(a == b);
     });
     res &= ::rc::check("stream signed char", [](signed char a) {
         const auto str{to_string(a)};
-        const auto std{to_std_string(a)};
+        const auto b{from_string<decltype(a)>(str)};
 
-        RC_ASSERT(str == std);
+        RC_ASSERT(a == b);
     });
     // unsigned
     res &= ::rc::check("stream unsigned int", [](unsigned int a) {
         const auto str{to_string(a)};
-        const auto std{to_std_string(a)};
+        const auto b{from_string<decltype(a)>(str)};
 
-        RC_ASSERT(str == std);
+        RC_ASSERT(a == b);
     });
     res &= ::rc::check("stream unsigned long", [](unsigned long a) {
         const auto str{to_string(a)};
-        const auto std{to_std_string(a)};
+        const auto b{from_string<decltype(a)>(str)};
 
-        RC_ASSERT(str == std);
+        RC_ASSERT(a == b);
     });
     res &= ::rc::check("stream unsigned long long", [](unsigned long long a) {
         const auto str{to_string(a)};
-        const auto std{to_std_string(a)};
+        const auto b{from_string<decltype(a)>(str)};
 
-        RC_ASSERT(str == std);
+        RC_ASSERT(a == b);
     });
     res &= ::rc::check("stream unsigned char", [](unsigned char a) {
         const auto str{to_string(a)};
-        const auto std{to_std_string(a)};
+        const auto b{from_string<decltype(a)>(str)};
 
-        RC_ASSERT(str == std);
+        RC_ASSERT(a == b);
     });
     // float
     res &= ::rc::check("stream float", [](float a) {
         const auto str{to_string(a)};
-        const auto std{to_std_string(a)};
+        const auto b{from_string<decltype(a)>(str)};
 
-        RC_ASSERT(str == std);
+        RC_ASSERT(a == b);
     });
     // char/string
     res &= ::rc::check("stream char", [](char a) {
@@ -137,27 +94,27 @@ int main()
     // hex
     res &= ::rc::check("stream hex int", [](int a) {
         const auto str{to_hex_string(a)};
-        const auto std{to_std_hex_string(a)};
+        const auto b{from_hex_string<decltype(a)>(str)};
 
-        RC_ASSERT(str == std);
+        RC_ASSERT(a == b);
     });
     res &= ::rc::check("stream hex long", [](long a) {
         const auto str{to_hex_string(a)};
-        const auto std{to_std_hex_string(a)};
+        const auto b{from_hex_string<decltype(a)>(str)};
 
-        RC_ASSERT(str == std);
+        RC_ASSERT(a == b);
     });
     res &= ::rc::check("stream hex long long", [](long long a) {
         const auto str{to_hex_string(a)};
-        const auto std{to_std_hex_string(a)};
+        const auto b{from_hex_string<decltype(a)>(str)};
 
-        RC_ASSERT(str == std);
+        RC_ASSERT(a == b);
     });
     res &= ::rc::check("stream hex signed char", [](signed char a) {
         const auto str{to_hex_string(a)};
-        const auto std{to_std_hex_string(a)};
+        const auto b{from_hex_string<decltype(a)>(str)};
 
-        RC_ASSERT(str == std);
+        RC_ASSERT(a == b);
     });
     return !res;
 }
