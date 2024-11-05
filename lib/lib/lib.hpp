@@ -60,6 +60,11 @@ class stream
         fill_char(a);
         return *this;
     }
+    auto operator<<(const char* a) -> stream&
+    {
+        fill_str(a);
+        return *this;
+    }
     auto operator<<(const std::string_view a) -> stream&
     {
         fill_str(a);

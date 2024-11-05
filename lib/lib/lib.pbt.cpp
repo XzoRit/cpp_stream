@@ -61,7 +61,19 @@ int main()
 
         RC_ASSERT(a == b);
     });
+    res &= ::rc::check("stream char", [](char a) {
+        const auto str{to_string(a)};
+        const auto b{from_string<decltype(a)>(str)};
+
+        RC_ASSERT(a == b);
+    });
     res &= ::rc::check("stream unsigned char", [](unsigned char a) {
+        const auto str{to_string(a)};
+        const auto b{from_string<decltype(a)>(str)};
+
+        RC_ASSERT(a == b);
+    });
+    res &= ::rc::check("stream unsigned char", [](signed char a) {
         const auto str{to_string(a)};
         const auto b{from_string<decltype(a)>(str)};
 
@@ -74,13 +86,7 @@ int main()
 
         RC_ASSERT(a == b);
     });
-    // char/string
-    res &= ::rc::check("stream char", [](char a) {
-        const auto str{to_string(a)};
-
-        RC_ASSERT(str.size() == 1u);
-        RC_ASSERT(a == str[0]);
-    });
+    // string
     res &= ::rc::check("stream string", [](std::string a) {
         const auto str{to_string(a)};
 
@@ -88,6 +94,11 @@ int main()
     });
     res &= ::rc::check("stream string_view", [](std::string a) {
         const auto str{to_string(std::string_view{a})};
+
+        RC_ASSERT(a == str);
+    });
+    res &= ::rc::check("stream string_view", [](std::string a) {
+        const auto str{to_string(a.c_str())};
 
         RC_ASSERT(a == str);
     });

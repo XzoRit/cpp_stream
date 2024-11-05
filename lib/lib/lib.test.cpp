@@ -52,6 +52,7 @@ BOOST_AUTO_TEST_CASE(stream_double)
 BOOST_AUTO_TEST_CASE(stream_str)
 {
     BOOST_REQUIRE(cmp_streams<char>());
+    BOOST_REQUIRE(roundtrip<char>());
 }
 BOOST_AUTO_TEST_CASE(getter)
 {
@@ -74,7 +75,7 @@ BOOST_AUTO_TEST_CASE(getter)
     BOOST_REQUIRE(s.str() ==
                   "123" + std::string(default_buffer_size - 3u, 'X'));
 
-    s << 'a';
+    s << "a";
     BOOST_REQUIRE(dat_ptr != s.c_str());
     BOOST_REQUIRE(s.c_str()[default_buffer_size] == 'a');
     BOOST_REQUIRE(s.c_str()[default_buffer_size + 1u] == '\0');
@@ -83,8 +84,8 @@ BOOST_AUTO_TEST_CASE(getter)
 }
 BOOST_AUTO_TEST_CASE(fmt_hex)
 {
-    // BOOST_REQUIRE(cmp_hex_streams<signed char>());
-    // BOOST_REQUIRE(cmp_hex_streams<unsigned char>());
+    BOOST_REQUIRE(cmp_hex_streams<signed char>());
+    BOOST_REQUIRE(cmp_hex_streams<unsigned char>());
     BOOST_REQUIRE(cmp_hex_streams<short>());
     BOOST_REQUIRE(cmp_hex_streams<unsigned short>());
     BOOST_REQUIRE(cmp_hex_streams<int>());
