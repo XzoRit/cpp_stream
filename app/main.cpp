@@ -29,20 +29,21 @@ int main(int ac, char* av[])
             std::cout << desc << "\n";
         }
 
+        const auto* a{"Hello string lit\n"};
+        const auto b{"Hello string std.string\n"s};
+        const auto c{"Hello string std.string_view\n"sv};
+        const auto* d{"Hello chars\n"};
+
         auto s{::xzr::lib::stream{}};
-        s << "Hello string lit\n";
-        s << "Hello string std.string\n"s;
-        s << "Hello string std.string_view\n"sv;
-        for (const auto c : "Hello chars\n")
-            s << c;
+        s << a << b << c;
+        for (const auto ch : "Hello chars\n")
+            s << ch;
         std::cout << s.str();
 
         auto os{std::ostringstream{}};
-        os << "Hello string lit\n";
-        os << "Hello string std.string\n"s;
-        os << "Hello string std.string_view\n"sv;
-        for (const auto c : "Hello chars\n")
-            os << c;
+        os << a << b << c;
+        for (const auto ch : "Hello chars\n")
+            os << ch;
         std::cout << os.str();
     }
     catch (const std::exception& e)
