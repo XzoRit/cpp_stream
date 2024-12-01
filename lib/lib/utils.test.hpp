@@ -4,8 +4,8 @@
 
 #include <array>
 #include <concepts>
+#include <cstdint>
 #include <cstdio>
-#include <limits>
 #include <sstream>
 #include <string>
 
@@ -49,6 +49,13 @@ inline auto to_string(auto a) -> std::string
 {
     auto s{::xzr::lib::stream{}};
     s << a;
+    return s.str();
+}
+inline auto from_std_hex_stream(unsigned char a) -> std::string
+{
+    auto s{std::ostringstream{}};
+    s << std::hex;
+    s.operator<<(a);
     return s.str();
 }
 inline auto from_std_hex_stream(std::unsigned_integral auto a) -> std::string
